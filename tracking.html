@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Form pembuatan dan tracking Delivery Order bahan ajar SITTA dengan Vue.js.">
+  <title>Tracking DO | SITTA Vue</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <script src="js/dataBahanAjar.js"></script>
+  <script src="js/tracking-app.js" defer></script>
+</head>
+<body>
+  <div id="trackingApp" v-cloak>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="SITTA Vue beranda"><img src="assets/logo-ut.png" alt="Logo Universitas Terbuka" class="brand-logo"><span class="brand-copy"><strong>SITTA <span>Vue</span></strong><small>Sistem Informasi Bahan Ajar</small></span></a>
+      <nav class="main-nav" aria-label="Navigasi utama"><a href="index.html">Beranda</a><a href="stok.html">Stok Bahan Ajar</a><a class="active" href="tracking.html">Tracking DO</a></nav>
+    </header>
+    <main class="container page-main">
+      <div class="breadcrumb"><a href="index.html">Beranda</a><span>/</span><span>Tracking Delivery Order</span></div>
+      <section class="page-heading"><div><p class="eyebrow">PENGIRIMAN BAHAN AJAR</p><h1>Tracking Delivery Order</h1><p class="muted">Buat nomor DO otomatis, pilih paket, dan cari informasi pengiriman.</p></div><span class="demo-pill">{{ orders.length }} DO tersimpan</span></section>
+      <section class="tracking-layout">
+        <div class="panel form-panel">
+          <div class="panel-heading"><div><h2>Buat Delivery Order</h2><p class="muted">Nomor DO akan dibuat otomatis saat formulir disimpan.</p></div><span class="step-badge">01</span></div>
+          <form @submit.prevent="createOrder" novalidate>
+            <label class="field"><span>Nomor Delivery Order</span><input type="text" :value="nextDONumber" readonly class="readonly-input"><small class="field-help">Format: DO + tahun berjalan + nomor urut.</small></label>
+            <div class="form-grid">
+              <label class="field"><span>NIM *</span><input v-model.trim="form.nim" type="text" inputmode="numeric" maxlength="12" placeholder="Masukkan NIM" required></label>
+              <label class="field"><span>Nama mahasiswa *</span><input v-model.trim="form.nama" type="text" maxlength="80" placeholder="Nama lengkap" required></label>
+              <label class="field"><span>UT-Daerah tujuan *</span><select v-model="form.upbjj" required><option value="">Pilih UT-Daerah</option><option v-for="lokasi in upbjjList" :key="lokasi" :value="lokasi">{{ lokasi }}</option></select></label>
+              <label class="field"><span>Layanan ekspedisi *</span><select v-model="form.layanan" required><option value="">Pilih layanan</option><option v-for="layanan in pengirimanList" :key="layanan.kode" :value="layanan.kode">{{ layanan.nama }}</option></select></label>
+              <label class="field"><span>Paket bahan ajar *</span><select v-model="form.paketKode" required><option value="">Pilih paket</option><option v-for="item in paket" :key="item.kode" :value="item.kode">{{ item.kode }} — {{ item.nama }}</option></select></label>
+              <label class="field"><span>Tanggal kirim *</span><input v-model="form.tanggalKirim" type="date" required></label>
+            </div>
+            <div v-if="selectedPackage" class="package-summary">
+              <div class="package-summary-title"><span class="package-icon">▣</span><div><strong>{{ selectedPackage.nama }}</strong><small>{{ selectedPackage.kode }} · {{ packageDetails.length }} bahan ajar</small></div></div>
+              <ul><li v-for="item in packageDetails" :key="item.kode"><span class="course-code">{{ item.kode }}</span><span>{{ item.judul }}</span></li></ul>
+              <div class="package-total"><span>Total harga paket</span><strong v-text="formatCurrency(selectedPackage.harga)"></strong></div>
+            </div>
+            <div v-else class="helper-box" v-show="!form.paketKode">Pilih paket untuk melihat kode, daftar isi, dan total harga secara otomatis.</div>
+            <p class="field-help destination-help">{{ destinationTip }}</p>
+            <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
+            <div class="form-actions"><button class="btn btn-light" type="button" @click="resetForm">Kosongkan formulir</button><button class="btn btn-primary" type="submit">Simpan DO <span aria-hidden="true">→</span></button></div>
+          </form>
+        </div>
+
+        <aside class="panel search-panel">
+          <div class="panel-heading"><div><h2>Cari status DO</h2><p class="muted">Hasil akan diperbarui saat nomor DO berubah.</p></div><span class="step-badge step-badge-blue">02</span></div>
+          <form @submit.prevent="lookupOrder(searchDO)" class="do-search-form">
+            <label class="field"><span>Nomor Delivery Order</span><input v-model.trim="searchDO" type="search" placeholder="Contoh: DO2025-0001" autocomplete="off"></label>
+            <button class="btn btn-primary btn-block" type="submit">Cari pengiriman <span aria-hidden="true">⌕</span></button>
+            <button v-show="searchDO" class="text-button search-clear" type="button" @click="searchDO = ''; selectedOrder = null; searchMessage = ''">Hapus pencarian</button>
+          </form>
+          <p v-if="searchMessage" class="search-message" :class="{ 'message-error': !selectedOrder }" role="status">{{ searchMessage }}</p>
+          <div v-if="selectedOrder" class="tracking-result">
+            <div class="result-topline"><span class="result-label">DETAIL PENGIRIMAN</span><span class="status-pill" :class="statusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></div>
+            <h3>{{ selectedOrder.nomorDO }}</h3><p class="result-name">{{ selectedOrder.nama }} <span>· NIM {{ selectedOrder.nim }}</span></p>
+            <div class="result-details">
+              <div><span>Ekspedisi</span><strong>{{ selectedOrder.ekspedisi }}</strong></div>
+              <div><span>UT-Daerah</span><strong>{{ selectedOrder.upbjj || '—' }}</strong></div>
+              <div><span>Tanggal kirim</span><strong>{{ formatDate(selectedOrder.tanggalKirim) }}</strong></div>
+              <div><span>Paket</span><strong>{{ selectedOrder.paket }}</strong></div>
+              <div class="detail-total"><span>Total pembayaran</span><strong>{{ formatCurrency(selectedOrder.total) }}</strong></div>
+            </div>
+            <div class="progress-section"><div class="progress-heading"><span>Proses pengiriman</span><strong>{{ progressPercent(selectedOrder.status) }}%</strong></div><div class="progress-track"><span :style="{ width: progressPercent(selectedOrder.status) + '%' }"></span></div><div class="progress-labels"><span>Diproses</span><span>Dikirim</span><span>Selesai</span></div></div>
+            <div class="timeline"><h4>Riwayat perjalanan</h4><div v-if="selectedOrder.perjalanan && selectedOrder.perjalanan.length" class="timeline-list"><div class="timeline-item" v-for="(event, index) in selectedOrder.perjalanan" :key="event.waktu + index"><span class="timeline-dot"></span><div><strong>{{ event.keterangan }}</strong><small>{{ event.waktu }}</small></div></div></div><p v-else class="muted">Belum ada riwayat perjalanan pada data simulasi.</p></div>
+          </div>
+          <div v-else class="tracking-empty"><div class="tracking-empty-icon">⌕</div><strong>Belum ada hasil</strong><p>Gunakan nomor DO contoh dari daftar atau buat DO baru melalui formulir di sebelah kiri.</p><button class="text-button" type="button" @click="searchDO = orders.length ? orders[0].nomorDO : ''">Tampilkan DO terakhir</button></div>
+        </aside>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-heading"><div><h2>Riwayat DO</h2><p class="muted">Daftar delivery order yang tersimpan dalam simulasi ini.</p></div><span class="result-count">{{ orders.length }} transaksi</span></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Nomor DO</th><th>Nama mahasiswa</th><th>UT-Daerah</th><th>Paket</th><th>Tanggal kirim</th><th>Status</th><th>Total</th><th>Aksi</th></tr></thead><tbody>
+          <tr v-for="order in sortedOrders" :key="order.nomorDO"><td><span class="course-code">{{ order.nomorDO }}</span></td><td>{{ order.nama }}<small class="table-subtext">NIM {{ order.nim }}</small></td><td>{{ order.upbjj || '—' }}</td><td>{{ order.paket }}</td><td>{{ formatDate(order.tanggalKirim) }}</td><td><span class="status-pill" :class="statusClass(order.status)">{{ order.status }}</span></td><td>{{ formatCurrency(order.total) }}</td><td><button class="btn btn-small btn-outline" type="button" @click="showOrder(order)">Lacak</button></td></tr>
+        </tbody></table></div>
+      </section>
+      <p class="page-footnote">Data bersifat simulasi pembelajaran dan tersimpan secara lokal pada browser yang digunakan.</p>
+    </main>
+    <transition name="toast"><div class="toast-message" v-if="toastMessage" role="status">✓ {{ toastMessage }}</div></transition>
+    <footer class="site-footer"><div class="container footer-inner"><span>SITTA Vue · Tracking Delivery Order</span><a href="index.html">Kembali ke beranda ↑</a></div></footer>
+  </div>
+</body>
+</html>

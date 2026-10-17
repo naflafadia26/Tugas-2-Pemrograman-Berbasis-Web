@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SITTA Vue - simulasi pengelolaan stok bahan ajar dan tracking delivery order Universitas Terbuka.">
+  <title>SITTA Vue | Beranda</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="home-page">
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="SITTA Vue beranda">
+      <img src="assets/logo-ut.png" alt="Logo Universitas Terbuka" class="brand-logo">
+      <span class="brand-copy"><strong>SITTA <span>Vue</span></strong><small>Sistem Informasi Bahan Ajar</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Navigasi utama">
+      <a class="active" href="index.html">Beranda</a>
+      <a href="stok.html">Stok Bahan Ajar</a>
+      <a href="tracking.html">Tracking DO</a>
+    </nav>
+  </header>
+
+  <main class="home-main container">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> TUGAS PRAKTIK 2 · VUE.JS</span>
+        <h1>Kelola bahan ajar lebih teratur, <span>pantau pengiriman lebih mudah.</span></h1>
+        <p>Simulasi antarmuka SITTA untuk melihat persediaan bahan ajar dan membuat serta melacak Delivery Order menggunakan Vue.js.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="stok.html">Buka informasi stok <span aria-hidden="true">→</span></a>
+          <a class="btn btn-light" href="tracking.html">Buat / cari DO</a>
+        </div>
+        <div class="hero-note"><span class="note-check">✓</span> Demo front-end dengan data dummy, tanpa database.</div>
+      </div>
+      <div class="hero-visual" aria-label="Ilustrasi pengelolaan bahan ajar">
+        <div class="visual-glow"></div>
+        <div class="visual-card visual-card-main">
+          <div class="visual-card-top"><span class="visual-icon">▤</span><span class="tiny-label">RINGKASAN STOK</span><span class="visual-live">DEMO</span></div>
+          <div class="visual-number">01 <span>—</span> 04</div>
+          <div class="visual-bars"><i style="height:40%"></i><i style="height:68%"></i><i style="height:48%"></i><i style="height:88%"></i><i style="height:60%"></i><i style="height:74%"></i><i style="height:52%"></i></div>
+          <div class="visual-footer"><span>Persediaan bahan ajar</span><span class="visual-status">● Aktif</span></div>
+        </div>
+        <div class="floating-chip chip-top"><span class="chip-symbol chip-green">✓</span><span><strong>Stok terpantau</strong><small>Status otomatis</small></span></div>
+        <div class="floating-chip chip-bottom"><span class="chip-symbol chip-blue">↗</span><span><strong>Tracking DO</strong><small>Proses tercatat</small></span></div>
+      </div>
+    </section>
+
+    <section class="section-heading">
+      <div><p class="eyebrow">PILIH MENU</p><h2>Semua kebutuhan dalam satu tempat</h2><p class="muted">Pilih halaman untuk mulai menjelajahi simulasi SITTA.</p></div>
+      <span class="demo-pill">Vue.js Options API</span>
+    </section>
+
+    <section class="menu-grid" aria-label="Menu aplikasi">
+      <a class="menu-card" href="stok.html">
+        <span class="menu-card-icon icon-stock">▤</span>
+        <span class="menu-card-tag">INVENTARIS</span>
+        <h3>Stok Bahan Ajar</h3>
+        <p>Telusuri stok berdasarkan UT-Daerah, kategori, dan kondisi persediaan. Ubah atau tambahkan data melalui formulir.</p>
+        <span class="menu-card-link">Buka halaman <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="menu-card" href="tracking.html">
+        <span class="menu-card-icon icon-tracking">⌁</span>
+        <span class="menu-card-tag">DISTRIBUSI</span>
+        <h3>Tracking Delivery Order</h3>
+        <p>Buat DO baru dengan nomor otomatis, pilih layanan dan paket, lalu cari status serta detail pengirimannya.</p>
+        <span class="menu-card-link">Buka halaman <span aria-hidden="true">→</span></span>
+      </a>
+    </section>
+
+    <section class="info-strip">
+      <div class="info-strip-icon">i</div>
+      <div><strong>Catatan penggunaan</strong><p>Aplikasi ini merupakan demonstrasi pembelajaran. Perubahan stok dan DO disimpan pada penyimpanan lokal browser, bukan pada server Universitas Terbuka.</p></div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><span>SITTA Vue · Simulasi Pembelajaran</span><span>HTML · CSS · Vue.js</span></div></footer>
+</body>
+</html>
